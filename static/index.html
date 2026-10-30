@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ GOL Analiz Sistemi</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #131920;
+            --bg-card: #1a2230;
+            --bg-card-hover: #1f2937;
+            --accent-green: #00e676;
+            --accent-blue: #2196f3;
+            --accent-orange: #ff9800;
+            --accent-red: #f44336;
+            --accent-yellow: #ffeb3b;
+            --accent-purple: #bb86fc;
+            --text-primary: #e4e4e7;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border: #2d3748;
+            --success: #00e676;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #00e676 0%, #2196f3 100%);
+            --gradient-3: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .header-title .logo {
+            font-size: 2rem;
+        }
+
+        .header-info {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-green);
+        }
+
+        .url-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .url-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .url-row .source-badge {
+            min-width: 100px;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-sofascore { background: #1a472a; color: #00e676; }
+        .badge-flashscore { background: #3d1c00; color: #ff9800; }
+        .badge-mackolik { background: #1a1a3e; color: #bb86fc; }
+
+        .url-input {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-2);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover { color: var(--text-primary); }
+
+        .tab.active {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+
+        /* Results */
+        .results-container {
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .icon {
+            font-size: 1.2rem;
+        }
+
+        /* Match Result Bar */
+        .result-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .result-bar-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            transition: all 0.3s;
+        }
+
+        .result-bar-segment:hover {
+            filter: brightness(1.2);
+        }
+
+        .seg-home { background: #2196f3; }
+        .seg-draw { background: #9e9e9e; }
+        .seg-away { background: #f44336; }
+
+        /* Stats Table */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 0.6rem 0.75rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-table th {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stats-table td {
+            font-size: 0.85rem;
+        }
+
+        .stats-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .stats-table .highlight {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        /* Value Bet Card */
+        .value-bet {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .value-bet:hover {
+            border-color: var(--accent-green);
+            background: rgba(0, 230, 118, 0.05);
+        }
+
+        .value-bet-info {
+            flex: 1;
+        }
+
+        .value-bet-market {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .value-bet-pick {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 2px 0;
+        }
+
+        .value-bet-prob {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .value-bet-odds {
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            min-width: 70px;
+        }
+
+        .value-bet-odds .odds-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .value-bet-odds .odds-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .confidence-HIGH { background: rgba(0, 230, 118, 0.2); color: var(--accent-green); }
+        .confidence-MEDIUM { background: rgba(255, 152, 0, 0.2); color: var(--accent-orange); }
+        .confidence-LOW { background: rgba(244, 67, 54, 0.2); color: var(--accent-red); }
+
+        /* Score Matrix */
+        .score-matrix {
+            overflow-x: auto;
+        }
+
+        .score-matrix table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        .score-matrix th,
+        .score-matrix td {
+            padding: 6px 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+            min-width: 45px;
+        }
+
+        .score-matrix th {
+            background: var(--bg-primary);
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .score-matrix td {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .score-matrix td:hover {
+            background: rgba(33, 150, 243, 0.2);
+        }
+
+        /* Heatmap renklendirme JS ile yapılacak */
+
+        /* Form Display */
+        .form-display {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .form-badge {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            color: #fff;
+        }
+
+        .form-W { background: #00c853; }
+        .form-D { background: #9e9e9e; }
+        .form-L { background: #f44336; }
+
+        /* XG Display */
+        .xg-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .xg-team {
+            flex: 1;
+            text-align: center;
+        }
+
+        .xg-team .team-name {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .xg-team .xg-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .xg-home .xg-value { color: var(--accent-blue); }
+        .xg-away .xg-value { color: var(--accent-red); }
+
+        .xg-vs {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        /* Over/Under Bars */
+        .ou-bar {
+            display: flex;
+            height: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 4px 0;
+        }
+
+        .ou-over {
+            background: var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .ou-under {
+            background: var(--accent-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent-green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* H2H Results */
+        .h2h-match {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .h2h-match:last-child {
+            border-bottom: none;
+        }
+
+        .h2h-score {
+            font-weight: 800;
+            min-width: 50px;
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .h2h-home-win { background: rgba(33, 150, 243, 0.2); color: var(--accent-blue); }
+        .h2h-draw { background: rgba(158, 158, 158, 0.2); color: #9e9e9e; }
+        .h2h-away-win { background: rgba(244, 67, 54, 0.2); color: var(--accent-red); }
+
+        /* Manual Input Section */
+        .manual-section {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .manual-section.active {
+            display: block;
+        }
+
+        .manual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .manual-team {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .manual-team h3 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        /* Error Message */
+        .error-msg {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-red);
+            display: none;
+        }
+
+        /* Full width card */
+        .card-full {
+            grid-column: 1 / -1;
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 0.75rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .manual-grid { grid-template-columns: 1fr; }
+            .header { padding: 0.75rem 1rem; }
+            .btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
+        }
+
+        /* Data quality indicator */
+        .quality-bar {
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .quality-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+
+        /* Summary Card */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+
+        .summary-item .value {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .summary-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Handicap table */
+        .handicap-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .handicap-row:last-child { border-bottom: none; }
+
+        .handicap-line {
+            font-weight: 700;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .handicap-prob {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .corner-card-row {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+
+        .corner-card-item {
+            text-align: center;
+        }
+
+        .corner-card-item .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-orange);
+        }
+
+        .corner-card-item .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-title">
+        <span class="logo">⚽</span>
+        <h1>GOL Analiz Sistemi</h1>
+    </div>
+    <div class="header-info" id="headerInfo">Poisson + İstatistiksel Model</div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Veriler çekiliyor...</div>
+</div>
+
+<div class="container">
+    <!-- URL Giriş -->
+    <div class="input-section">
+        <h2>🔗 Maç Linkleri</h2>
+        <div class="url-inputs">
+            <div class="url-row">
+                <span class="source-badge badge-sofascore">SofaScore</span>
+                <input type="text" class="url-input" id="urlSofa" placeholder="https://www.sofascore.com/football/match/...">
+            </div>
+            <div class="url-row">
+                <span class="source-badge badge-flashscore">FlashScore</span>
+                <input type="text" class="url-input" id="urlFlash" placeholder="https://www.flashscore.com.tr/mac/...">
+            </div>
+            <div class="url-row">
+                <span class="source-badge badge-mackolik">Mackolik</span>
+                <input type="text" class="url-input" id="urlMackolik" placeholder="https://arsiv.mackolik.com/Mac/...">
+            </div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-primary" id="btnAnalyze" onclick="analyzeFromURLs()">
+                🔍 Analiz Et
+            </button>
+            <button class="btn btn-secondary" onclick="toggleManual()">
+                ✏️ Manuel Giriş
+            </button>
+            <button class="btn btn-secondary" onclick="clearAll()">
+                🗑️ Temizle
+            </button>
+        </div>
+    </div>
+
+    <!-- Manuel Giriş -->
+    <div class="manual-section" id="manualSection">
+        <h2 style="color: var(--accent-orange); margin-bottom: 1rem;">✏️ Manuel Veri Girişi</h2>
+        <div class="manual-grid">
+            <!-- Ev Sahibi -->
+            <div class="manual-team">
+                <h3 style="color: var(--accent-blue);">🏠 Ev Sahibi</h3>
+                <div class="form-group">
+                    <label>Takım Adı</label>
+                    <input type="text" id="m_home_name" value="Konyaspor">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Maç</label><input type="number" id="m_home_mp" value="10"></div>
+                    <div class="form-group"><label>Galibiyet</label><input type="number" id="m_home_w" value="4"></div>
+                    <div class="form-group"><label>Beraberlik</label><input type="number" id="m_home_d" value="2"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Mağlubiyet</label><input type="number" id="m_home_l" value="4"></div>
+                    <div class="form-group"><label>Attığı Gol</label><input type="number" id="m_home_gf" value="14"></div>
+                    <div class="form-group"><label>Yediği Gol</label><input type="number" id="m_home_ga" value="12"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ev Maçı</label><input type="number" id="m_home_hp" value="5"></div>
+                    <div class="form-group"><label>Ev Gol A.</label><input type="number" id="m_home_hgf" value="9"></div>
+                    <div class="form-group"><label>Ev Gol Y.</label><input type="number" id="m_home_hga" value="5"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Dep. Maçı</label><input type="number" id="m_home_ap" value="5"></div>
+                    <div class="form-group"><label>Dep. Gol A.</label><input type="number" id="m_home_agf" value="5"></div>
+                    <div class="form-group"><label>Dep. Gol Y.</label><input type="number" id="m_home_aga" value="7"></div>
+                </div>
+                <div class="form-group">
+                    <label>Son Form (W/D/L)</label>
+                    <input type="text" id="m_home_form" value="WDLWDWLLWD" placeholder="Örn: WWDLW">
+                </div>
+            </div>
+
+            <!-- Deplasman -->
+            <div class="manual-team">
+                <h3 style="color: var(--accent-red);">✈️ Deplasman</h3>
+                <div class="form-group">
+                    <label>Takım Adı</label>
+                    <input type="text" id="m_away_name" value="Galatasaray">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Maç</label><input type="number" id="m_away_mp" value="10"></div>
+                    <div class="form-group"><label>Galibiyet</label><input type="number" id="m_away_w" value="7"></div>
+                    <div class="form-group"><label>Beraberlik</label><input type="number" id="m_away_d" value="2"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Mağlubiyet</label><input type="number" id="m_away_l" value="1"></div>
+                    <div class="form-group"><label>Attığı Gol</label><input type="number" id="m_away_gf" value="22"></div>
+                    <div class="form-group"><label>Yediği Gol</label><input type="number" id="m_away_ga" value="8"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ev Maçı</label><input type="number" id="m_away_hp" value="5"></div>
+                    <div class="form-group"><label>Ev Gol A.</label><input type="number" id="m_away_hgf" value="14"></div>
+                    <div class="form-group"><label>Ev Gol Y.</label><input type="number" id="m_away_hga" value="3"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Dep. Maçı</label><input type="number" id="m_away_ap" value="5"></div>
+                    <div class="form-group"><label>Dep. Gol A.</label><input type="number" id="m_away_agf" value="8"></div>
+                    <div class="form-group"><label>Dep. Gol Y.</label><input type="number" id="m_away_aga" value="5"></div>
+                </div>
+                <div class="form-group">
+                    <label>Son Form (W/D/L)</label>
+                    <input type="text" id="m_away_form" value="WWWDWWWLWW" placeholder="Örn: LDWDL">
+                </div>
+            </div>
+        </div>
+
+        <!-- H2H -->
+        <div style="margin-top: 1.5rem; background: var(--bg-primary); border-radius: 12px; padding: 1.5rem;">
+            <h3 style="color: var(--accent-purple); margin-bottom: 1rem;">🔄 Karşılıklı Sonuçlar (H2H)</h3>
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
+                <div class="form-group"><label>Toplam Maç</label><input type="number" id="m_h2h_total" value="10"></div>
+                <div class="form-group"><label>Ev Galibiyet</label><input type="number" id="m_h2h_hw" value="3"></div>
+                <div class="form-group"><label>Beraberlik</label><input type="number" id="m_h2h_d" value="2"></div>
+                <div class="form-group"><label>Dep. Galibiyet</label><input type="number" id="m_h2h_aw" value="5"></div>
+                <div class="form-group"><label>Ev Toplam Gol</label><input type="number" id="m_h2h_hg" value="12"></div>
+                <div class="form-group"><label>Dep. Toplam Gol</label><input type="number" id="m_h2h_ag" value="18"></div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+            <label>Lig Gol Ortalaması (maç başı)</label>
+            <input type="number" id="m_league_avg" value="2.6" step="0.1" style="max-width: 200px;">
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="analyzeManual()">🔍 Manuel Analiz Et</button>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="resultTabs" style="display: none;">
+        <button class="tab active" onclick="switchTab('overview')">📊 Genel Bakış</button>
+        <button class="tab" onclick="switchTab('bets')">💰 Bahis Önerileri</button>
+        <button class="tab" onclick="switchTab('combo')">🎯 Kombine</button>
+        <button class="tab" onclick="switchTab('goals')">⚽ Gol Pazarları</button>
+        <button class="tab" onclick="switchTab('scores')">🎯 Skor Tahmini</button>
+        <button class="tab" onclick="switchTab('teams')">📋 Takım İstatistikleri</button>
+        <button class="tab" onclick="switchTab('h2h')">🔄 H2H</button>
+        <button class="tab" onclick="switchTab('handicap')">📐 Handikap</button>
+    </div>
+
+    <!-- Results -->
+    <div class="results-container" id="resultsContainer">
+
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="tab-overview">
+            <div id="overviewContent"></div>
+        </div>
+
+        <!-- Bets Tab -->
+        <div class="tab-content" id="tab-bets">
+            <div id="betsContent"></div>
+        </div>
+
+        <!-- Combo Tab -->
+        <div class="tab-content" id="tab-combo">
+            <div id="comboContent"></div>
+        </div>
+
+        <!-- Goals Tab -->
+        <div class="tab-content" id="tab-goals">
+            <div id="goalsContent"></div>
+        </div>
+
+        <!-- Scores Tab -->
+        <div class="tab-content" id="tab-scores">
+            <div id="scoresContent"></div>
+        </div>
+
+        <!-- Teams Tab -->
+        <div class="tab-content" id="tab-teams">
+            <div id="teamsContent"></div>
+        </div>
+
+        <!-- H2H Tab -->
+        <div class="tab-content" id="tab-h2h">
+            <div id="h2hContent"></div>
+        </div>
+
+        <!-- Handicap Tab -->
+        <div class="tab-content" id="tab-handicap">
+            <div id="handicapContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentData = null;
+
+function showLoading(text) {
+    document.getElementById('loadingOverlay').classList.add('active');
+    document.getElementById('loadingText').textContent = text || 'Veriler çekiliyor...';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 8000);
+}
+
+function toggleManual() {
+    const section = document.getElementById('manualSection');
+    section.classList.toggle('active');
+}
+
+function clearAll() {
+    document.getElementById('urlSofa').value = '';
+    document.getElementById('urlFlash').value = '';
+    document.getElementById('urlMackolik').value = '';
+    document.getElementById('resultsContainer').classList.remove('active');
+    document.getElementById('resultTabs').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+}
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    event.target.classList.add('active');
+}
+
+async function analyzeFromURLs() {
+    const urls = [
+        document.getElementById('urlSofa').value.trim(),
+        document.getElementById('urlFlash').value.trim(),
+        document.getElementById('urlMackolik').value.trim()
+    ].filter(u => u);
+
+    if (urls.length === 0) {
+        showError('En az bir URL girin.');
+        return;
+    }
+
+    showLoading('Sitelerden veriler çekiliyor...');
+
+    try {
+        const resp = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls })
+        });
+
+        const data = await resp.json();
+        if (data.error) {
+            showError(data.error);
+            hideLoading();
+            return;
+        }
+
+        currentData = data;
+        renderResults(data);
+    } catch (e) {
+        showError('Bağlantı hatası: ' + e.message);
+    }
+
+    hideLoading();
+}
+
+async function analyzeManual() {
+    showLoading('Analiz hesaplanıyor...');
+
+    const formStr = (id) => document.getElementById(id).value;
+    const formNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    const formInt = (id) => parseInt(document.getElementById(id).value) || 0;
+
+    const homeForm = formStr('m_home_form').toUpperCase();
+    const awayForm = formStr('m_away_form').toUpperCase();
+
+    const body = {
+        home_name: formStr('m_home_name'),
+        home_mp: formInt('m_home_mp'),
+        home_w: formInt('m_home_w'),
+        home_d: formInt('m_home_d'),
+        home_l: formInt('m_home_l'),
+        home_gf: formInt('m_home_gf'),
+        home_ga: formInt('m_home_ga'),
+        home_hp: formInt('m_home_hp'),
+        home_hgf: formInt('m_home_hgf'),
+        home_hga: formInt('m_home_hga'),
+        home_ap: formInt('m_home_ap'),
+        home_agf: formInt('m_home_agf'),
+        home_aga: formInt('m_home_aga'),
+        home_hw: Math.round(formInt('m_home_hp') * formInt('m_home_w') / Math.max(formInt('m_home_mp'), 1)),
+        home_hd: Math.round(formInt('m_home_hp') * formInt('m_home_d') / Math.max(formInt('m_home_mp'), 1)),
+        home_hl: Math.round(formInt('m_home_hp') * formInt('m_home_l') / Math.max(formInt('m_home_mp'), 1)),
+        home_aw: Math.round(formInt('m_home_ap') * formInt('m_home_w') / Math.max(formInt('m_home_mp'), 1)),
+        home_ad: Math.round(formInt('m_home_ap') * formInt('m_home_d') / Math.max(formInt('m_home_mp'), 1)),
+        home_al: Math.round(formInt('m_home_ap') * formInt('m_home_l') / Math.max(formInt('m_home_mp'), 1)),
+        home_form: homeForm,
+        home_fgf: Math.round(formInt('m_home_gf') * homeForm.length / Math.max(formInt('m_home_mp'), 1)),
+        home_fga: Math.round(formInt('m_home_ga') * homeForm.length / Math.max(formInt('m_home_mp'), 1)),
+        home_fm: homeForm.length,
+
+        away_name: formStr('m_away_name'),
+        away_mp: formInt('m_away_mp'),
+        away_w: formInt('m_away_w'),
+        away_d: formInt('m_away_d'),
+        away_l: formInt('m_away_l'),
+        away_gf: formInt('m_away_gf'),
+        away_ga: formInt('m_away_ga'),
+        away_hp: formInt('m_away_hp'),
+        away_hgf: formInt('m_away_hgf'),
+        away_hga: formInt('m_away_hga'),
+        away_ap: formInt('m_away_ap'),
+        away_agf: formInt('m_away_agf'),
+        away_aga: formInt('m_away_aga'),
+        away_hw: Math.round(formInt('m_away_hp') * formInt('m_away_w') / Math.max(formInt('m_away_mp'), 1)),
+        away_hd: Math.round(formInt('m_away_hp') * formInt('m_away_d') / Math.max(formInt('m_away_mp'), 1)),
+        away_hl: Math.round(formInt('m_away_hp') * formInt('m_away_l') / Math.max(formInt('m_away_mp'), 1)),
+        away_aw: Math.round(formInt('m_away_ap') * formInt('m_away_w') / Math.max(formInt('m_away_mp'), 1)),
+        away_ad: Math.round(formInt('m_away_ap') * formInt('m_away_d') / Math.max(formInt('m_away_mp'), 1)),
+        away_al: Math.round(formInt('m_away_ap') * formInt('m_away_l') / Math.max(formInt('m_away_mp'), 1)),
+        away_form: awayForm,
+        away_fgf: Math.round(formInt('m_away_gf') * awayForm.length / Math.max(formInt('m_away_mp'), 1)),
+        away_fga: Math.round(formInt('m_away_ga') * awayForm.length / Math.max(formInt('m_away_mp'), 1)),
+        away_fm: awayForm.length,
+
+        h2h_total: formInt('m_h2h_total'),
+        h2h_hw: formInt('m_h2h_hw'),
+        h2h_d: formInt('m_h2h_d'),
+        h2h_aw: formInt('m_h2h_aw'),
+        h2h_hg: formInt('m_h2h_hg'),
+        h2h_ag: formInt('m_h2h_ag'),
+
+        league_avg: formNum('m_league_avg')
+    };
+
+    try {
+        const resp = await fetch('/api/quick-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await resp.json();
+        if (data.error) {
+            showError(data.error);
+            hideLoading();
+            return;
+        }
+
+        currentData = data;
+        renderResults(data);
+    } catch (e) {
+        showError('Hata: ' + e.message);
+    }
+
+    hideLoading();
+}
+
+function renderResults(data) {
+    document.getElementById('resultTabs').style.display = 'flex';
+    document.getElementById('resultsContainer').classList.add('active');
+
+    renderOverview(data);
+    renderBets(data);
+    renderCombo(data);
+    renderGoals(data);
+    renderScores(data);
+    renderTeams(data);
+    renderH2H(data);
+    renderHandicap(data);
+
+    // Reset to overview tab
+    switchTabDirect('overview');
+}
+
+function switchTabDirect(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.querySelector(`.tab[onclick*="${name}"]`).classList.add('active');
+}
+
+function pctColor(val) {
+    if (val > 65) return 'var(--accent-green)';
+    if (val > 45) return 'var(--accent-orange)';
+    return 'var(--accent-red)';
+}
+
+function renderOverview(d) {
+    const mr = d.match_result;
+    const qualityPct = (d.data_quality * 100);
+    const qualityColor = qualityPct > 70 ? 'var(--accent-green)' : (qualityPct > 40 ? 'var(--accent-orange)' : 'var(--accent-red)');
+    
+    const bestBet = d.value_bets && d.value_bets.length > 0 ? d.value_bets[0] : null;
+
+    let html = `
+    <div class="cards-grid">
+        <!-- XG Display -->
+        <div class="card card-full">
+            <div class="card-title"><span class="icon">⚡</span> Beklenen Goller (xG)</div>
+            <div class="xg-display">
+                <div class="xg-team xg-home">
+                    <div class="team-name">${d.home_team}</div>
+                    <div class="xg-value">${d.home_xg.toFixed(2)}</div>
+                </div>
+                <div class="xg-vs">VS</div>
+                <div class="xg-team xg-away">
+                    <div class="team-name">${d.away_team}</div>
+                    <div class="xg-value">${d.away_xg.toFixed(2)}</div>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                Toplam xG: <strong style="color: var(--accent-yellow);">${d.total_xg.toFixed(2)}</strong>
+            </div>
+        </div>
+
+        <!-- Maç Sonucu -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🏆</span> Maç Sonucu (1X2)</div>
+            <div class="result-bar">
+                <div class="result-bar-segment seg-home" style="width: ${(mr.home_win * 100).toFixed(0)}%">
+                    1: ${(mr.home_win * 100).toFixed(1)}%
+                </div>
+                <div class="result-bar-segment seg-draw" style="width: ${(mr.draw * 100).toFixed(0)}%">
+                    X: ${(mr.draw * 100).toFixed(1)}%
+                </div>
+                <div class="result-bar-segment seg-away" style="width: ${(mr.away_win * 100).toFixed(0)}%">
+                    2: ${(mr.away_win * 100).toFixed(1)}%
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><th></th><th>1 (Ev)</th><th>X</th><th>2 (Dep)</th></tr>
+                <tr>
+                    <td style="color: var(--text-muted)">Olasılık</td>
+                    <td class="highlight">${(mr.home_win * 100).toFixed(1)}%</td>
+                    <td>${(mr.draw * 100).toFixed(1)}%</td>
+                    <td>${(mr.away_win * 100).toFixed(1)}%</td>
+                </tr>
+                <tr>
+                    <td style="color: var(--text-muted)">Oran</td>
+                    <td>${mr.home_odds}</td>
+                    <td>${mr.draw_odds}</td>
+                    <td>${mr.away_odds}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Çifte Şans -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🎲</span> Çifte Şans</div>
+            <table class="stats-table">
+                <tr><th></th><th>1X</th><th>X2</th><th>12</th></tr>
+                <tr>
+                    <td style="color: var(--text-muted)">Olasılık</td>
+                    <td>${(d.double_chance['1X'].prob * 100).toFixed(1)}%</td>
+                    <td>${(d.double_chance['X2'].prob * 100).toFixed(1)}%</td>
+                    <td>${(d.double_chance['12'].prob * 100).toFixed(1)}%</td>
+                </tr>
+                <tr>
+                    <td style="color: var(--text-muted)">Oran</td>
+                    <td>${d.double_chance['1X'].odds}</td>
+                    <td>${d.double_chance['X2'].odds}</td>
+                    <td>${d.double_chance['12'].odds}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Ü/A 2.5 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">⚽</span> Toplam Gol 2.5</div>
+            <div class="ou-bar">
+                <div class="ou-over" style="width: ${(d.over_under['2.5'].over * 100)}%">
+                    Üst ${(d.over_under['2.5'].over * 100).toFixed(1)}%
+                </div>
+                <div class="ou-under" style="width: ${(d.over_under['2.5'].under * 100)}%">
+                    Alt ${(d.over_under['2.5'].under * 100).toFixed(1)}%
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.85rem;">
+                <span>Üst Oran: <strong style="color: var(--accent-green)">${d.over_under['2.5'].over_odds}</strong></span>
+                <span>Alt Oran: <strong style="color: var(--accent-red)">${d.over_under['2.5'].under_odds}</strong></span>
+            </div>
+        </div>
+
+        <!-- KG -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🥅</span> Karşılıklı Gol (KG)</div>
+            <div class="ou-bar">
+                <div class="ou-over" style="width: ${(d.btts.yes * 100)}%; background: var(--accent-blue);">
+                    Var ${(d.btts.yes * 100).toFixed(1)}%
+                </div>
+                <div class="ou-under" style="width: ${(d.btts.no * 100)}%">
+                    Yok ${(d.btts.no * 100).toFixed(1)}%
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.85rem;">
+                <span>Var Oran: <strong style="color: var(--accent-blue)">${d.btts.yes_odds}</strong></span>
+                <span>Yok Oran: <strong style="color: var(--accent-red)">${d.btts.no_odds}</strong></span>
+            </div>
+        </div>
+
+        <!-- Tahmini Köşe/Kart -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📐</span> Tahmini Köşe & Kart</div>
+            <div class="corner-card-row">
+                <div class="corner-card-item">
+                    <div class="value">${d.corners_estimate}</div>
+                    <div class="label">Tahmini Köşe</div>
+                </div>
+                <div class="corner-card-item">
+                    <div class="value" style="color: var(--accent-yellow)">${d.cards_estimate}</div>
+                    <div class="label">Tahmini Kart</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Veri Kalitesi -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span> Veri Kalitesi</div>
+            <div style="font-size: 2rem; font-weight: 800; color: ${qualityColor}; text-align: center;">
+                ${qualityPct.toFixed(0)}%
+            </div>
+            <div class="quality-bar">
+                <div class="quality-fill" style="width: ${qualityPct}%; background: ${qualityColor};"></div>
+            </div>
+            <div style="text-align: center; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                ${qualityPct > 70 ? 'Güvenilir veri' : (qualityPct > 40 ? 'Orta düzey veri' : 'Düşük veri — dikkatli olun')}
+            </div>
+            ${d.analysis_time ? `<div style="text-align: center; margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-muted);">Analiz: ${d.analysis_time}</div>` : ''}
+            ${d.dixon_coles_rho ? `<div style="text-align: center; margin-top: 0.3rem; font-size: 0.65rem; color: var(--text-muted);">Dixon-Coles ρ: ${d.dixon_coles_rho}</div>` : ''}
+        </div>
+
+        <!-- Trend -->
+        ${d.home_trend && d.away_trend ? `
+        <div class="card">
+            <div class="card-title"><span class="icon">📈</span> Form Trendi</div>
+            <div style="display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">${d.home_team}</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: ${d.home_trend.direction === 'up' ? 'var(--accent-green)' : (d.home_trend.direction === 'down' ? 'var(--accent-red)' : 'var(--accent-orange)')};">
+                        ${d.home_trend.direction === 'up' ? '&#x2191; ' : (d.home_trend.direction === 'down' ? '&#x2193; ' : '&#x2192; ')}${d.home_trend.label}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Son 3 PPG: ${d.home_trend.last3_ppg}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">${d.away_team}</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: ${d.away_trend.direction === 'up' ? 'var(--accent-green)' : (d.away_trend.direction === 'down' ? 'var(--accent-red)' : 'var(--accent-orange)')};">
+                        ${d.away_trend.direction === 'up' ? '&#x2191; ' : (d.away_trend.direction === 'down' ? '&#x2193; ' : '&#x2192; ')}${d.away_trend.label}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Son 3 PPG: ${d.away_trend.last3_ppg}</div>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+
+        ${bestBet ? `
+        <!-- En İyi Bahis -->
+        <div class="card" style="border-color: var(--accent-green);">
+            <div class="card-title"><span class="icon">⭐</span> En İyi Öneri</div>
+            <div class="value-bet" style="border-color: var(--accent-green);">
+                <div class="value-bet-info">
+                    <div class="value-bet-market">${bestBet.market}</div>
+                    <div class="value-bet-pick">${bestBet.pick}
+                        <span class="confidence-badge confidence-${bestBet.confidence}">${bestBet.confidence}</span>
+                    </div>
+                    <div class="value-bet-prob">Olasılık: ${bestBet.probability}%</div>
+                </div>
+                <div class="value-bet-odds">
+                    <div class="odds-value">${bestBet.fair_odds}</div>
+                    <div class="odds-label">Fair Oran</div>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+    </div>`;
+
+    document.getElementById('overviewContent').innerHTML = html;
+}
+
+function renderBets(d) {
+    if (!d.value_bets || d.value_bets.length === 0) {
+        document.getElementById('betsContent').innerHTML = '<div class="card"><p style="color: var(--text-muted)">Güçlü bahis önerisi bulunamadı.</p></div>';
+        return;
+    }
+
+    let highBets = d.value_bets.filter(b => b.confidence === 'HIGH');
+    let medBets = d.value_bets.filter(b => b.confidence === 'MEDIUM');
+    let lowBets = d.value_bets.filter(b => b.confidence === 'LOW');
+
+    let html = '<div class="cards-grid">';
+
+    // HIGH
+    if (highBets.length > 0) {
+        html += `<div class="card card-full" style="border-color: var(--accent-green);">
+            <div class="card-title"><span class="icon">🟢</span> Yüksek Güven</div>`;
+        highBets.forEach(b => { html += renderBetCard(b); });
+        html += '</div>';
+    }
+
+    // MEDIUM
+    if (medBets.length > 0) {
+        html += `<div class="card card-full" style="border-color: var(--accent-orange);">
+            <div class="card-title"><span class="icon">🟡</span> Orta Güven</div>`;
+        medBets.forEach(b => { html += renderBetCard(b); });
+        html += '</div>';
+    }
+
+    // LOW
+    if (lowBets.length > 0) {
+        html += `<div class="card card-full">
+            <div class="card-title"><span class="icon">🔴</span> Düşük Güven</div>`;
+        lowBets.forEach(b => { html += renderBetCard(b); });
+        html += '</div>';
+    }
+
+    html += '</div>';
+    document.getElementById('betsContent').innerHTML = html;
+}
+
+function renderBetCard(b) {
+    const kellyHtml = b.kelly && b.kelly > 0 
+        ? `<div style="font-size: 0.7rem; color: var(--accent-purple); margin-top: 2px;">Kelly: %${b.kelly} bankroll</div>` 
+        : '';
+    return `
+    <div class="value-bet">
+        <div class="value-bet-info">
+            <div class="value-bet-market">${b.market}</div>
+            <div class="value-bet-pick">${b.pick}
+                <span class="confidence-badge confidence-${b.confidence}">${b.confidence}</span>
+            </div>
+            <div class="value-bet-prob">Olasılık: ${b.probability}%</div>
+            ${kellyHtml}
+        </div>
+        <div class="value-bet-odds">
+            <div class="odds-value">${b.fair_odds}</div>
+            <div class="odds-label">Fair Oran</div>
+        </div>
+    </div>`;
+}
+
+function renderCombo(d) {
+    if (!d.combo_bets || d.combo_bets.length === 0) {
+        document.getElementById('comboContent').innerHTML = '<div class="card"><p style="color: var(--text-muted)">Uygun kombine bahis bulunamadı.</p></div>';
+        return;
+    }
+
+    let html = '<div class="cards-grid">';
+    html += `<div class="card card-full" style="border-color: var(--accent-purple);">
+        <div class="card-title"><span class="icon">🎯</span> Kombine Bahis Önerileri</div>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+            Korelasyon bazlı mantıklı kombineler. Olasılıklar bağımsızlık varsayımına göre düzeltilmiştir.
+        </p>`;
+
+    d.combo_bets.forEach(c => {
+        const confColor = c.confidence === 'HIGH' ? 'var(--accent-green)' : (c.confidence === 'MEDIUM' ? 'var(--accent-orange)' : 'var(--accent-red)');
+        html += `
+        <div class="value-bet" style="border-left: 3px solid var(--accent-purple);">
+            <div class="value-bet-info">
+                <div class="value-bet-market" style="color: var(--accent-purple);">${c.name}</div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.3rem 0;">
+                    ${c.picks.map(p => `<span style="background: var(--bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${p}</span>`).join('')}
+                </div>
+                <div class="value-bet-prob">Olasılık: ${c.probability}%
+                    <span class="confidence-badge confidence-${c.confidence}">${c.confidence}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${c.reasoning}</div>
+                ${c.kelly > 0 ? `<div style="font-size: 0.7rem; color: var(--accent-purple); margin-top: 2px;">Kelly: %${c.kelly} bankroll</div>` : ''}
+            </div>
+            <div class="value-bet-odds">
+                <div class="odds-value" style="color: var(--accent-purple);">${c.fair_odds}</div>
+                <div class="odds-label">Fair Oran</div>
+            </div>
+        </div>`;
+    });
+
+    html += '</div></div>';
+    document.getElementById('comboContent').innerHTML = html;
+}
+
+function renderGoals(d) {
+    let html = '<div class="cards-grid">';
+
+    // Maç Sonu Ü/A
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">⚽</span> Maç Sonu Ü/A</div>
+        <table class="stats-table">
+            <tr><th>Çizgi</th><th>Üst %</th><th>Alt %</th><th>Üst Oran</th><th>Alt Oran</th></tr>`;
+    
+    for (const line of [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]) {
+        const ou = d.over_under[line];
+        if (!ou) continue;
+        html += `<tr>
+            <td style="font-weight: 700;">${line}</td>
+            <td style="color: ${ou.over > 0.55 ? 'var(--accent-green)' : 'inherit'}">${(ou.over * 100).toFixed(1)}%</td>
+            <td style="color: ${ou.under > 0.55 ? 'var(--accent-red)' : 'inherit'}">${(ou.under * 100).toFixed(1)}%</td>
+            <td>${ou.over_odds}</td>
+            <td>${ou.under_odds}</td>
+        </tr>`;
+    }
+    html += '</table></div>';
+
+    // İlk Yarı Ü/A
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">⏱️</span> İlk Yarı Ü/A</div>
+        <table class="stats-table">
+            <tr><th>Çizgi</th><th>Üst %</th><th>Alt %</th><th>Üst Oran</th><th>Alt Oran</th></tr>`;
+    
+    for (const line of [0.5, 1.5, 2.5]) {
+        const ou = d.ht_over_under[line];
+        if (!ou) continue;
+        html += `<tr>
+            <td style="font-weight: 700;">İY ${line}</td>
+            <td style="color: ${ou.over > 0.55 ? 'var(--accent-green)' : 'inherit'}">${(ou.over * 100).toFixed(1)}%</td>
+            <td style="color: ${ou.under > 0.55 ? 'var(--accent-red)' : 'inherit'}">${(ou.under * 100).toFixed(1)}%</td>
+            <td>${ou.over_odds}</td>
+            <td>${ou.under_odds}</td>
+        </tr>`;
+    }
+    html += '</table></div>';
+
+    // İlk Yarı 1X2
+    if (d.ht_result) {
+        const ht = d.ht_result;
+        html += `<div class="card">
+            <div class="card-title"><span class="icon">⏱️</span> İlk Yarı Sonucu (1X2)</div>
+            <div class="result-bar">
+                <div class="result-bar-segment seg-home" style="width: ${(ht.home_win * 100).toFixed(0)}%">
+                    1: ${(ht.home_win * 100).toFixed(1)}%
+                </div>
+                <div class="result-bar-segment seg-draw" style="width: ${(ht.draw * 100).toFixed(0)}%">
+                    X: ${(ht.draw * 100).toFixed(1)}%
+                </div>
+                <div class="result-bar-segment seg-away" style="width: ${(ht.away_win * 100).toFixed(0)}%">
+                    2: ${(ht.away_win * 100).toFixed(1)}%
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><th></th><th>1 (Ev)</th><th>X</th><th>2 (Dep)</th></tr>
+                <tr>
+                    <td style="color: var(--text-muted)">Oran</td>
+                    <td>${ht.home_odds}</td>
+                    <td>${ht.draw_odds}</td>
+                    <td>${ht.away_odds}</td>
+                </tr>
+            </table>
+        </div>`;
+    }
+
+    // KG Detay
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">🥅</span> Karşılıklı Gol</div>
+        <div class="ou-bar" style="height: 50px; font-size: 0.9rem;">
+            <div class="ou-over" style="width: ${(d.btts.yes * 100)}%; background: var(--accent-green);">
+                KG Var ${(d.btts.yes * 100).toFixed(1)}%
+            </div>
+            <div class="ou-under" style="width: ${(d.btts.no * 100)}%;">
+                KG Yok ${(d.btts.no * 100).toFixed(1)}%
+            </div>
+        </div>
+        <table class="stats-table" style="margin-top: 1rem;">
+            <tr><th></th><th>KG Var</th><th>KG Yok</th></tr>
+            <tr>
+                <td style="color: var(--text-muted)">Olasılık</td>
+                <td style="color: var(--accent-green)">${(d.btts.yes * 100).toFixed(1)}%</td>
+                <td style="color: var(--accent-red)">${(d.btts.no * 100).toFixed(1)}%</td>
+            </tr>
+            <tr>
+                <td style="color: var(--text-muted)">Fair Oran</td>
+                <td>${d.btts.yes_odds}</td>
+                <td>${d.btts.no_odds}</td>
+            </tr>
+        </table>
+    </div>`;
+
+    // Ü/A Görsel Barlar
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">📊</span> Gol Dağılımı</div>`;
+    for (const line of [1.5, 2.5, 3.5, 4.5]) {
+        const ou = d.over_under[line];
+        if (!ou) continue;
+        html += `
+        <div style="margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px;">
+                <span>${line} Alt: ${(ou.under * 100).toFixed(0)}%</span>
+                <span>${line} Üst: ${(ou.over * 100).toFixed(0)}%</span>
+            </div>
+            <div class="ou-bar" style="height: 24px;">
+                <div class="ou-under" style="width: ${(ou.under * 100)}%; background: #455a64;">${(ou.under * 100).toFixed(0)}%</div>
+                <div class="ou-over" style="width: ${(ou.over * 100)}%">${(ou.over * 100).toFixed(0)}%</div>
+            </div>
+        </div>`;
+    }
+    html += '</div>';
+
+    html += '</div>';
+    document.getElementById('goalsContent').innerHTML = html;
+}
+
+function renderScores(d) {
+    let html = '<div class="cards-grid">';
+
+    // Top 15 Skor
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">🎯</span> En Olası 15 Skor</div>
+        <table class="stats-table">
+            <tr><th>#</th><th>Skor</th><th>Olasılık</th><th>Oran</th></tr>`;
+    
+    d.top_scores.forEach((s, i) => {
+        const isHighlight = i < 3;
+        html += `<tr>
+            <td style="color: var(--text-muted)">${i + 1}</td>
+            <td style="font-weight: 700; ${isHighlight ? 'color: var(--accent-green)' : ''}">${s.score}</td>
+            <td>${s.probability}%</td>
+            <td>${s.odds}</td>
+        </tr>`;
+    });
+    html += '</table></div>';
+
+    // Skor Matrisi
+    html += `<div class="card card-full">
+        <div class="card-title"><span class="icon">🗺️</span> Skor Olasılık Matrisi (Isı Haritası)</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Satırlar: ${d.home_team} (Ev) | Sütunlar: ${d.away_team} (Dep)
+        </div>
+        <div class="score-matrix">
+            <table>
+                <tr><th>${d.home_team} \\ ${d.away_team}</th>`;
+    
+    for (let a = 0; a <= 6; a++) {
+        html += `<th>${a}</th>`;
+    }
+    html += '</tr>';
+
+    const matrix = d.score_matrix;
+    if (matrix) {
+        // Max değeri bul (renklendirme için)
+        let maxProb = 0;
+        for (let h = 0; h <= 6; h++) {
+            for (let a = 0; a <= 6; a++) {
+                if (matrix[h] && matrix[h][a] > maxProb) maxProb = matrix[h][a];
+            }
+        }
+
+        for (let h = 0; h <= 6; h++) {
+            html += `<tr><th>${h}</th>`;
+            for (let a = 0; a <= 6; a++) {
+                const prob = matrix[h] ? matrix[h][a] : 0;
+                const pct = (prob * 100).toFixed(1);
+                const intensity = prob / maxProb;
+                const r = Math.round(10 + intensity * 0);
+                const g = Math.round(20 + intensity * 180);
+                const b = Math.round(30 + intensity * 100);
+                const bgColor = `rgba(0, ${Math.round(intensity * 230)}, ${Math.round(intensity * 118)}, ${(intensity * 0.6).toFixed(2)})`;
+                html += `<td style="background: ${bgColor}; font-weight: ${intensity > 0.5 ? '700' : '400'};" title="${h}-${a}: ${pct}%">${pct}%</td>`;
+            }
+            html += '</tr>';
+        }
+    }
+
+    html += '</table></div></div>';
+    html += '</div>';
+
+    document.getElementById('scoresContent').innerHTML = html;
+}
+
+function renderTeams(d) {
+    const hs = d.home_stats_summary;
+    const as = d.away_stats_summary;
+
+    let html = '<div class="cards-grid">';
+
+    // Ev Sahibi
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">🏠</span> ${d.home_team}</div>
+        <div class="form-display" style="margin-bottom: 1rem;">`;
+    if (hs.form) {
+        for (const c of hs.form) {
+            html += `<span class="form-badge form-${c}">${c}</span>`;
+        }
+    }
+    html += `</div>
+        <table class="stats-table">
+            <tr><td style="color: var(--text-muted)">Maç/G/B/M</td><td class="highlight">${hs.matches_played} / ${hs.wins} / ${hs.draws} / ${hs.losses}</td></tr>
+            <tr><td style="color: var(--text-muted)">Gol A/Y/F</td><td>${hs.gf} / ${hs.ga} / ${hs.gd > 0 ? '+' : ''}${hs.gd}</td></tr>
+            <tr><td style="color: var(--text-muted)">Maç Başı Puan</td><td class="highlight">${hs.ppg}</td></tr>
+            <tr><td style="color: var(--text-muted)">Ort. Attığı/Yediği</td><td>${hs.avg_gf} / ${hs.avg_ga}</td></tr>
+            <tr><td style="color: var(--text-muted)">Ev Ort. A/Y</td><td style="color: var(--accent-blue)">${hs.home_avg_gf} / ${hs.home_avg_ga}</td></tr>
+            <tr><td style="color: var(--text-muted)">Gol Yememe %</td><td>${hs.clean_sheet_pct}%</td></tr>
+            <tr><td style="color: var(--text-muted)">KG Var %</td><td>${hs.btts_pct}%</td></tr>
+            <tr><td style="color: var(--text-muted)">Ü2.5 %</td><td>${hs.over25_pct || 0}%</td></tr>
+            <tr><td style="color: var(--text-muted)">İY Gol Oranı</td><td>${hs.ht_goal_ratio || 42}%</td></tr>
+            <tr><td style="color: var(--text-muted)">Form PPG</td><td class="highlight">${hs.form_ppg}</td></tr>
+        </table>
+    </div>`;
+
+    // Deplasman
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">✈️</span> ${d.away_team}</div>
+        <div class="form-display" style="margin-bottom: 1rem;">`;
+    if (as.form) {
+        for (const c of as.form) {
+            html += `<span class="form-badge form-${c}">${c}</span>`;
+        }
+    }
+    html += `</div>
+        <table class="stats-table">
+            <tr><td style="color: var(--text-muted)">Maç/G/B/M</td><td class="highlight">${as.matches_played} / ${as.wins} / ${as.draws} / ${as.losses}</td></tr>
+            <tr><td style="color: var(--text-muted)">Gol A/Y/F</td><td>${as.gf} / ${as.ga} / ${as.gd > 0 ? '+' : ''}${as.gd}</td></tr>
+            <tr><td style="color: var(--text-muted)">Maç Başı Puan</td><td class="highlight">${as.ppg}</td></tr>
+            <tr><td style="color: var(--text-muted)">Ort. Attığı/Yediği</td><td>${as.avg_gf} / ${as.avg_ga}</td></tr>
+            <tr><td style="color: var(--text-muted)">Dep. Ort. A/Y</td><td style="color: var(--accent-red)">${as.away_avg_gf} / ${as.away_avg_ga}</td></tr>
+            <tr><td style="color: var(--text-muted)">Gol Yememe %</td><td>${as.clean_sheet_pct}%</td></tr>
+            <tr><td style="color: var(--text-muted)">KG Var %</td><td>${as.btts_pct}%</td></tr>
+            <tr><td style="color: var(--text-muted)">Ü2.5 %</td><td>${as.over25_pct || 0}%</td></tr>
+            <tr><td style="color: var(--text-muted)">İY Gol Oranı</td><td>${as.ht_goal_ratio || 42}%</td></tr>
+            <tr><td style="color: var(--text-muted)">Form PPG</td><td class="highlight">${as.form_ppg}</td></tr>
+        </table>
+    </div>`;
+
+    // Karşılaştırma
+    html += `<div class="card card-full">
+        <div class="card-title"><span class="icon">⚔️</span> Karşılaştırma</div>
+        <table class="stats-table">
+            <tr><th>${d.home_team}</th><th>Metrik</th><th>${d.away_team}</th></tr>
+            <tr>
+                <td style="color: ${hs.ppg > as.ppg ? 'var(--accent-green)' : 'inherit'}">${hs.ppg}</td>
+                <td style="color: var(--text-muted)">PPG</td>
+                <td style="color: ${as.ppg > hs.ppg ? 'var(--accent-green)' : 'inherit'}">${as.ppg}</td>
+            </tr>
+            <tr>
+                <td style="color: ${hs.avg_gf > as.avg_gf ? 'var(--accent-green)' : 'inherit'}">${hs.avg_gf}</td>
+                <td style="color: var(--text-muted)">Ort. Attığı</td>
+                <td style="color: ${as.avg_gf > hs.avg_gf ? 'var(--accent-green)' : 'inherit'}">${as.avg_gf}</td>
+            </tr>
+            <tr>
+                <td style="color: ${hs.avg_ga < as.avg_ga ? 'var(--accent-green)' : 'inherit'}">${hs.avg_ga}</td>
+                <td style="color: var(--text-muted)">Ort. Yediği</td>
+                <td style="color: ${as.avg_ga < hs.avg_ga ? 'var(--accent-green)' : 'inherit'}">${as.avg_ga}</td>
+            </tr>
+            <tr>
+                <td style="color: ${hs.form_ppg > as.form_ppg ? 'var(--accent-green)' : 'inherit'}">${hs.form_ppg}</td>
+                <td style="color: var(--text-muted)">Form PPG</td>
+                <td style="color: ${as.form_ppg > hs.form_ppg ? 'var(--accent-green)' : 'inherit'}">${as.form_ppg}</td>
+            </tr>
+            <tr>
+                <td>${hs.home_avg_gf}</td>
+                <td style="color: var(--text-muted)">Ev/Dep Ort. Gol</td>
+                <td>${as.away_avg_gf}</td>
+            </tr>
+        </table>
+    </div>`;
+
+    html += '</div>';
+    document.getElementById('teamsContent').innerHTML = html;
+}
+
+function renderH2H(d) {
+    if (!d.h2h_summary) {
+        document.getElementById('h2hContent').innerHTML = '<div class="card"><p style="color: var(--text-muted)">H2H verisi bulunamadı.</p></div>';
+        return;
+    }
+
+    const h = d.h2h_summary;
+    let html = '<div class="cards-grid">';
+
+    html += `<div class="card">
+        <div class="card-title"><span class="icon">🔄</span> Karşılıklı Özet (${h.total} Maç)</div>
+        <div class="result-bar">
+            <div class="result-bar-segment seg-home" style="width: ${h.total > 0 ? (h.home_wins / h.total * 100) : 33}%">
+                ${d.home_team}: ${h.home_wins}
+            </div>
+            <div class="result-bar-segment seg-draw" style="width: ${h.total > 0 ? (h.draws / h.total * 100) : 34}%">
+                B: ${h.draws}
+            </div>
+            <div class="result-bar-segment seg-away" style="width: ${h.total > 0 ? (h.away_wins / h.total * 100) : 33}%">
+                ${d.away_team}: ${h.away_wins}
+            </div>
+        </div>
+        <table class="stats-table">
+            <tr><td style="color: var(--text-muted)">Ort. Gol/Maç</td><td class="highlight">${h.avg_goals}</td></tr>
+            <tr><td style="color: var(--text-muted)">2.5 Üst %</td><td>${h.over25_pct}%</td></tr>
+            <tr><td style="color: var(--text-muted)">KG Var %</td><td>${h.btts_pct}%</td></tr>
+        </table>
+    </div>`;
+
+    // Son karşılaşmalar
+    if (h.results && h.results.length > 0) {
+        html += `<div class="card">
+            <div class="card-title"><span class="icon">📜</span> Son Karşılaşmalar</div>`;
+        h.results.forEach(r => {
+            const cls = r.home_score > r.away_score ? 'h2h-home-win' : (r.home_score === r.away_score ? 'h2h-draw' : 'h2h-away-win');
+            const date = r.date ? new Date(r.date * 1000).toLocaleDateString('tr-TR') : '';
+            html += `<div class="h2h-match">
+                <span style="min-width: 80px; font-size: 0.75rem; color: var(--text-muted)">${date}</span>
+                <span style="flex: 1; text-align: right; font-size: 0.85rem;">${r.home_team || d.home_team}</span>
+                <span class="h2h-score ${cls}">${r.home_score} - ${r.away_score}</span>
+                <span style="flex: 1; font-size: 0.85rem;">${r.away_team || d.away_team}</span>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    html += '</div>';
+    document.getElementById('h2hContent').innerHTML = html;
+}
+
+function renderHandicap(d) {
+    let html = '<div class="cards-grid">';
+
+    html += `<div class="card card-full">
+        <div class="card-title"><span class="icon">📐</span> Asya Handikap</div>
+        <table class="stats-table">
+            <tr><th>Handikap</th><th>${d.home_team} %</th><th>${d.away_team} %</th><th>Ev Oran</th><th>Dep Oran</th></tr>`;
+    
+    const lines = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5];
+    lines.forEach(line => {
+        const h = d.handicaps[line];
+        if (!h) return;
+        const label = line > 0 ? `+${line}` : `${line}`;
+        html += `<tr>
+            <td style="font-weight: 700;">${label}</td>
+            <td style="color: ${h.home_cover > 0.55 ? 'var(--accent-green)' : 'inherit'}">${(h.home_cover * 100).toFixed(1)}%</td>
+            <td style="color: ${h.away_cover > 0.55 ? 'var(--accent-green)' : 'inherit'}">${(h.away_cover * 100).toFixed(1)}%</td>
+            <td>${h.home_odds}</td>
+            <td>${h.away_odds}</td>
+        </tr>`;
+    });
+    html += '</table></div></div>';
+
+    document.getElementById('handicapContent').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
